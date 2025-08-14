@@ -33,7 +33,12 @@ db.init_app(app)
 with app.app_context():
     db.create_all()
 
-# Rota específica para widget.js via API (DEVE VIR ANTES da catch-all)
+# Rota específica para ficheiros estáticos (DEVE VIR ANTES da catch-all)
+@app.route('/static/<path:filename>')
+def serve_static(filename):
+    return send_from_directory(app.static_folder, filename)
+
+# Rota específica para widget.js via API 
 @app.route('/api/widget.js')
 def serve_widget_api():
     return send_from_directory(app.static_folder, 'widget.js', mimetype='application/javascript')
