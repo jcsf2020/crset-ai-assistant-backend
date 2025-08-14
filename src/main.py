@@ -34,6 +34,11 @@ with app.app_context():
     db.create_all()
 
 @app.route('/', defaults={'path': ''})
+# Rota específica para widget.js
+@app.route('/widget.js')
+def serve_widget():
+    return send_from_directory(app.static_folder, 'widget.js', mimetype='application/javascript')
+
 @app.route('/<path:path>')
 def serve(path):
     static_folder_path = app.static_folder
