@@ -10,16 +10,24 @@ from src.routes.user import user_bp
 from src.routes.chat import chat_bp
 
 app = Flask(__name__, static_folder=os.path.join(os.path.dirname(__file__), 'static'))
-app.config['SECRET_KEY'] = 'crset-ai-assistant-secret-key-2025'
 
-# Configurar CORS
-CORS(app, supports_credentials=True)
+# Configuração para Render
+app.config['SECRET_KEY'] = os.getenv('FLASK_SECRET_KEY', 'crset-ai-assistant-secret-key-2025')
+
+# Configurar CORS para domínios CRSET
+cors_origins = os.getenv('CORS_ORIGINS', 'https://crsetsolutions.com,https://chat.crsetsolutions.com').split(',')
+CORS(app, origins=cors_origins, supports_credentials=True)
 
 app.register_blueprint(user_bp, url_prefix='/api')
 app.register_blueprint(chat_bp, url_prefix='/api')
 
-# uncomment if you need to use database
-app.config['SQLALCHEMY_DATABASE_URI'] = f"sqlite:///{os.path.join(os.path.dirname(__file__), 'database', 'app.db')}"
+# Database configuration
+database_url = os.getenv('DATABASE_URL')
+if database_url:
+    app.config['SQLALCHEMY_DATABASE_URI'] = database_url
+else:
+    app.config['SQLALCHEMY_DATABASE_URI'] = f"sqlite:///{os.path.join(os.path.dirname(__file__), 'database', 'app.db')}"
+
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db.init_app(app)
 with app.app_context():
@@ -43,4 +51,5 @@ def serve(path):
 
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    port = int(os.getenv('PORT', 5000))
+    app.run(host='0.0.0.0', port=port, debug=False)
